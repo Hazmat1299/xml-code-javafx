@@ -1,0 +1,112 @@
+import javafx.animation.AnimationTimer;
+import javafx.application.Application;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public class FlappyBird extends Application {
+    private static final int WIDTH = 320;
+    private static final int HEIGHT = 480;
+    private static final int PIPE_WIDTH = 60;
+    private static final int PIPE_HEIGHT = 400;
+    private static final int PIPE_GAP = 100;
+
+    private double birdX = WIDTH  4.0;
+    private double birdY = HEIGHT  2.0;
+    private double birdSpeed = 0;
+    private final double gravity = 0.25;
+    private final double jumpStrength = 4.6;
+
+    private final ListDouble pipePositions = new ArrayList();
+    private double pipeSpeed = 2;
+    private final Random random = new Random();
+
+    private Image birdImage;
+    private Image pipeImage;
+
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle(Flappy Bird);
+        Group root = new Group();
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
+
+        Canvas canvas = new Canvas(WIDTH, HEIGHT);
+        root.getChildren().add(canvas);
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        birdImage = new Image(getClass().getResourceAsStream(bird.png));
+        pipeImage = new Image(getClass().getResourceAsStream(pipe.png));
+
+        scene.setOnKeyPressed(thishandleKeyPress);
+
+        AnimationTimer timer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                update();
+                draw(gc);
+            }
+        };
+        timer.start();
+
+        primaryStage.show();
+    }
+
+    private void handleKeyPress(KeyEvent event) {
+        switch (event.getCode()) {
+            case SPACE
+                birdSpeed = -jumpStrength;
+                break;
+        }
+    }
+
+    private void update() {
+        birdSpeed += gravity;
+        birdY += birdSpeed;
+
+        if (birdY + birdImage.getHeight() = HEIGHT) {
+            birdY = HEIGHT - birdImage.getHeight();
+            birdSpeed = 0;
+        }
+
+        if (pipePositions.isEmpty()  pipePositions.get(pipePositions.size() - 1)  WIDTH - 200) {
+            pipePositions.add((double) WIDTH);
+        }
+
+        for (int i = 0; i  pipePositions.size(); i++) {
+            double newPos = pipePositions.get(i) - pipeSpeed;
+            pipePositions.set(i, newPos);
+
+            if (newPos + PIPE_WIDTH  0) {
+                pipePositions.remove(i);
+                i--;
+            }
+        }
+    }
+
+    private void draw(GraphicsContext gc) {
+        gc.setFill(Color.SKYBLUE);
+        gc.fillRect(0, 0, WIDTH, HEIGHT);
+
+        gc.drawImage(birdImage, birdX, birdY);
+
+        for (double pipeX  pipePositions) {
+            double pipeY = random.nextInt(HEIGHT - PIPE_GAP - 100) - PIPE_HEIGHT;
+            gc.drawImage(pipeImage, pipeX, pipeY);
+            gc.drawImage(pipeImage, pipeX, pipeY + PIPE_HEIGHT + PIPE_GAP);
+        }
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
